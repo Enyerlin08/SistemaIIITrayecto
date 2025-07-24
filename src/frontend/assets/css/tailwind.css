@@ -1,0 +1,68 @@
+/* Base de Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ocultar el texto 'Showing X-Y of Z' de la tabla */
+.flex.items-center.font-semibold.tracking-wide.uppercase {
+  display: none !important;
+}
+
+.sidebar {
+  background-color: #036149 !important; 
+}
+
+/* Logo del Sidebar */
+.sidebar-logo {
+  color: #ffffff;
+}
+
+/* Enlaces del Sidebar */
+.sidebar-link {
+  color: #ffffff !important;
+}
+.sidebar-link:hover {
+  color: #0dec63 !important;
+}
+
+.dark .sidebar-link {
+  color: #9ca3af !important;
+}
+.dark .sidebar-link:hover,
+
+/* Iconos del sidebar */
+.sidebar .icon,
+.sidebar-icon {
+  color: #ffffff !important;
+}
+
+/* Tabla */
+table td,
+table th {
+  color: black !important; 
+}
+
+/* Botones */
+.bg-purple-600,
+.bg-purple-700,
+.bg-purple-800,
+.hover\:bg-purple-600:hover,
+.hover\:bg-purple-700:hover,
+.hover\:bg-purple-800:hover,
+.active\:bg-purple-600:active,
+.active\:bg-purple-700:active,
+.active\:bg-purple-800:active {
+  background-color: #036149 !important;
+}
+
+.border-purple-600,
+.border-purple-700,
+.border-purple-800 {
+  border-color: #036149 !important;
+}
+/* iconos de notificacion y modo claro/oscuro */
+.text-purple-600,
+.text-purple-700,
+.text-purple-800 {
+  color: #036149 !important;
+}

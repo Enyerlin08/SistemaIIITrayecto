@@ -1,0 +1,154 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../../servicio/api'; // Asegúrate de tener la configuración correcta de la API
+import {
+  Button,
+  Label,
+  Input,
+} from '@windmill/react-ui';
+
+const CargoModificar = ({ cargoId, onCloseModal, onModificarExitoso }) => {
+  const [formData, setFormData] = useState({ nombre: '' });
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
+
+  // Función para obtener el cargo por ID
+  const obtenerCargoPorId = async (id) => {
+    try {
+      console.log('IDDDDDDD del cargo:', id); // Verifica el ID aquí
+      const response = await api.get(`/cargos/${id}`);
+      console.log('Respuesta de la API:', response.data); // Verifica la respuesta aquí
+      if (response.data) {
+        setFormData({
+          nombre: response.data.nombre || '',
+        });
+      }
+    } catch (error) {
+      console.error('Error al obtener el cargo:', error);
+      setMessage('Error al obtener los datos del cargo');
+      setMessageType('danger');
+    }
+  };
+
+  // Obtener el cargo cuando el componente se monta o cuando cambia el cargoId
+  useEffect(() => {
+    if (cargoId) {
+      obtenerCargoPorId(cargoId);
+    }
+  }, [cargoId]);
+
+  // Verificar el estado de formData cuando cambia
+  useEffect(() => {
+    console.log('Estado de formData:', formData); // Verifica el estado de formData
+  }, [formData]);
+
+  // Función para manejar el cambio en los campos del formulario
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Eliminar números y caracteres no permitidos
+    const soloLetras = value.replace(/[^A-Za-záéíóúñÁÉÍÓÚÑ\s]/g, "");
+
+    // Actualizar el estado del campo
+    setFormData({ ...formData, [name]: soloLetras });
+
+    // Validar en tiempo real
+    if (value !== soloLetras) {
+      setErrors({ ...errors, [name]: "Solo se permiten letras, espacios, ñ y tildes" });
+    } else {
+      setErrors({ ...errors, [name]: "" }); // Limpiar el mensaje de error
+    }
+  };
+
+  // Función para validar los campos antes de enviar el formulario
+  const validarForm = () => {
+    let formErrors = {};
+
+    // Validar que el campo no esté vacío
+    if (!formData.nombre) {
+      formErrors.nombre = "El nombre del cargo es requerido";
+    }
+    // Validar que solo contenga letras, espacios, ñ y tildes
+    else if (!/^[A-Za-záéíóúñÁÉÍÓÚÑ\s]+$/.test(formData.nombre)) {
+      formErrors.nombre = "Solo se permiten letras, espacios, ñ y tildes";
+    }
+
+    return formErrors;
+  };
+
+  // Función para manejar el envío del formulario
+  const manejarEnvio = async (e) => {
+    e.preventDefault();
+    const formErrors = validarForm();
+    setErrors(formErrors);
+
+    if (Object.keys(formErrors).length === 0) {
+      try {
+        const url = `/cargos/modificar/${cargoId}`; // Ruta para modificar el cargo
+        const method = "put"; // Método PUT para modificar
+
+        const response = await api[method](url, formData, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          setMessage('Cargo actualizado con éxito');
+          setMessageType('success');
+          setFormData({ nombre: '' });
+          if (onModificarExitoso) onModificarExitoso('Cargo actualizado con éxito', 'success');
+          if (onCloseModal) onCloseModal(); // Cerrar el modal al completar
+        }
+      } catch (error) {
+        setMessage('Error al actualizar el cargo');
+        setMessageType('danger');
+        console.error('Error al actualizar el cargo:', error);
+        if (onModificarExitoso) onModificarExitoso('Error: ' + error.response?.data?.error, 'danger');
+      }
+    }
+  };
+
+  return (
+    <div>
+      <h2>Modificar Cargo</h2>
+      
+      {message && (
+        <div className={`mt-4 p-2 rounded-md ${messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {message}
+        </div>
+      )}
+      
+      <form onSubmit={manejarEnvio}>
+        <div className="mb-4">
+          <Label className="block">Nombre del Cargo</Label>
+          <Input
+            type="text"
+            name="nombre"
+            value={formData.nombre}
+            onChange={handleChange}
+            className="mt-1"
+          />
+          {errors.nombre && <span className="text-red-500 text-sm mt-1">{errors.nombre}</span>}
+        </div>
+
+        <div className="flex justify-end gap-4 mt-6">
+          <Button 
+            size="large" 
+            layout="outline" 
+            onClick={onCloseModal} 
+          >
+            Cancelar
+          </Button>
+          <Button 
+            size="large" 
+            layout="primary" 
+            type="submit"
+          >
+            {messageType === 'success' ? 'Actualizando...' : 'Actualizar'}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default CargoModificar;
